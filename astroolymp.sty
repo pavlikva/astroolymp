@@ -323,6 +323,7 @@
   \renewcommand*{\tabcolsep}{0.01\textwidth}% [v1.4]
   \if@answer%
     \begin{quote}% [v2.0]
+      % FYI, the following two lines rise warnings if no table or figure is present in the result environment
       \captionsetup[figure]{labelfont={bf,color=blue}, font={color=blue}}% [v3.2]
       \captionsetup[table]{labelfont={bf,color=blue}, font={color=blue}}% [v3.2]
       \color{blue} #2%
