@@ -1,0 +1,488 @@
+%% Package for creating AO in LaTeX.
+%%
+%% (c) Vaclav Pavlik
+%%
+%% This program can be redistributed and/or modified under the terms
+%% of the LaTeX Project Public License Distributed from CTAN archives
+%% in http://www.latex-project.org/lppl.txt.
+%%
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{astroolymp}[2016/02/24 v1.5.1 LaTeX package for AO]
+% [2016/02/24 v1.5.1 LaTeX package for AO] % quick fix \Qa counter
+% [2016/02/13 v1.5 LaTeX package for AO]
+% [2015/11/04 v1.4 LaTeX package for AO]
+% [2015/05/23 v1.3 LaTeX package for AO]
+% [2014/09/09 v1.2 LaTeX package for AO]
+% [2014/09/05 v1.1 LaTeX package for AO]
+% [2014/09/02 v1.0 LaTeX package for AO]
+
+%% PDF version [v1.1]
+\pdfminorversion=4
+\pdfobjcompresslevel=0
+
+%% options
+%% display answers [v1.1]
+\newif\if@answer\@answerfalse
+\DeclareOption{answer}{\@answertrue}
+%% display watermark [v1.1]
+\newif\if@watermark\@watermarkfalse
+\DeclareOption{watermark}{\@watermarktrue}
+%% categories [v1.2]
+\newif\if@ab\@abfalse
+\DeclareOption{ab}{\@abtrue}
+\newif\if@cd\@cdfalse
+\DeclareOption{cd}{\@cdtrue}
+\newif\if@ef\@effalse
+\DeclareOption{ef}{\@eftrue}
+\newif\if@gh\@ghfalse
+\DeclareOption{gh}{\@ghtrue}
+\newif\if@xy\@xyfalse
+\DeclareOption{xy}{\@xytrue}
+%% identification for school (default) [v1.4]
+\newif\if@school\@schooltrue
+%% identification for regio and final [v1.3]
+\newif\if@regio\@regiofalse
+\DeclareOption{regio}{\@regiotrue\@schoolfalse}
+\newif\if@final\@finalfalse
+\DeclareOption{final}{\@finaltrue\@schoolfalse}
+%% public version [v1.3]
+\newif\if@public\@publicfalse
+\DeclareOption{public}{\@publictrue}
+\ProcessOptions\relax
+
+
+%% general packages required
+%% layout
+\RequirePackage[left=15mm,right=15mm,top=20mm,bottom=45mm]{geometry}
+\RequirePackage{multicol}
+\RequirePackage[small,bf]{caption}
+%% language
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[czech]{babel}
+%% color
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+%% mathematics
+\RequirePackage{amsthm}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsfonts}
+\RequirePackage{xparse}
+\RequirePackage{bm}
+%% clickable hypertext [v1.4]
+\RequirePackage[bookmarks=false]{hyperref}
+\hypersetup{
+  unicode=true,
+  pdfstartview=FitH,
+  colorlinks=true,
+  urlcolor=blue,
+  linkcolor=black,
+  filecolor=black
+}
+
+%% define watermark [v1.1]
+\if@watermark
+  \RequirePackage{eso-pic}
+  \AddToShipoutPicture{%
+    \setlength{\@tempdimb}{.5\paperwidth}%
+    \setlength{\@tempdimc}{.5\paperheight}%
+    \setlength{\unitlength}{1pt}%
+    \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+      \makebox(0,0){%
+	\resizebox{.8\paperwidth}{.8\paperheight}{%
+	  \rotatebox{60}{\textcolor[gray]{0.75}{!! ŘEŠENÍ !!}}%
+	}%
+      }%
+    }%
+  }
+\fi
+
+
+%% total counts
+\RequirePackage{totcount}
+%% register to counter
+\regtotcounter{section}
+\regtotcounter{page}
+\newcounter{nop}% number_of_points [v1.3]
+\regtotcounter{nop}
+
+
+%% definition of for loop
+\RequirePackage{ifthen}
+%%
+\newcommand{\forloop}[5][1]{%
+  \setcounter{#2}{#3}%
+  \ifthenelse{#4}{% if
+    #5
+    \addtocounter{#2}{#1}%
+    \forloop[#1]{#2}{\value{#2}}{#4}{#5}%
+  }
+  {% else
+  }
+}
+% \forloop[step]{counter}{initial_value}{conditional}{code_block}
+
+
+%% header/footer
+\RequirePackage{fancyhdr}
+\fancyhf{}
+%% header
+\renewcommand{\headrulewidth}{0pt}
+\pagestyle{fancy}
+\setlength\headheight{84pt}
+\setlength\headsep{1pt}% [v1.4]
+%% defined by categories [v1.2]
+\newcommand{\round}[1]{%
+  \if@ab
+    \chead{\includegraphics[width=0.94\textwidth]{AO_zahlavi_ABCD}\\
+    \large\bfseries #1, kategorie AB (3. a 4. ročník SŠ)%
+    \if@answer\space -- řešení\fi}
+  \fi
+  \if@cd
+    \chead{\includegraphics[width=0.94\textwidth]{AO_zahlavi_ABCD}\\
+    \large\bfseries #1, kategorie CD (1. a 2. ročník SŠ)%
+    \if@answer\space -- řešení\fi}
+  \fi
+  \if@ef
+    \chead{\includegraphics[width=0.85\textwidth]{AO_zahlavi_EFGH}\\
+    \large\bfseries #1, kategorie EF (8. a 9. třída ZŠ)%
+    \if@answer\space -- řešení\fi}
+  \fi
+  \if@gh
+    \chead{\includegraphics[width=0.85\textwidth]{AO_zahlavi_EFGH}\\
+    \large\bfseries #1, kategorie GH (6. a 7. třída ZŠ)%
+    \if@answer\space -- řešení\fi}
+  \fi
+  \if@xy
+    \chead{\includegraphics[width=0.94\textwidth]{AO_zahlavi_ABCD}\\
+    \large\bfseries #1}
+  \fi
+}
+% \round{round_year}
+
+
+%% footer
+\cfoot{\thepage\space /\space\total{page}}
+%% [v1.3]
+%% optimized in [v1.4]
+\if@xy\else%
+  \lfoot{Jméno: \underline{\hspace{15em}}}%
+  \if@school\else%
+    \rfoot{Identifikátor: \underline{\hspace{1em}} \underline{\hspace{1em}} \underline{\hspace{1em}} \underline{\hspace{1em}} \underline{\hspace{1em}}}%
+  \fi%
+\fi
+
+
+%% no indent of paragraphs
+\setlength{\parindent}{0pt}
+
+
+%% style for sectionning
+\RequirePackage{titlesec}
+%%
+\renewcommand{\thesection}{\Alph{section}}
+\titleformat{\section}[frame]{}{}{1pt}{\Large\bfseries\filcenter\thesection\quad}
+% \section{title}
+
+
+%% total points for the main exercise
+\newcommand{\totpoints}[1]{%
+  \vspace{-10pt}
+  \begin{center}
+    \small\emph{(celkem max. #1 \ifthenelse{#1=1}{bod}{\ifthenelse{#1<5}{\ifthenelse{#1=0}{bodů}{body}}{bodů}})}
+  \end{center}
+  \vspace{-5pt}
+  \addtocounter{nop}{#1}% [v1.3]
+}
+% \totpoints{number_of_points}
+
+
+%% total and min. points
+\newcommand{\eval}[1]{%
+  \if@public%
+  \else%
+    \if@answer%
+      \textcolor{red}{%
+      \bfseries{Bodové hodnocení:}\\
+      Celkový počet bodů: \bfseries{\total{nop}}\\
+      \if@school%
+	Minimální počet bodů pro postup do dalšího kola: \bfseries{#1}\\
+      \fi%
+      \if@regio% [v1.5]
+	Pro postup do dalšího kola: \bfseries{#1}\\
+      \fi%
+      \if@final% [v1.5]
+	Vyhodnocení: \bfseries{#1}\\
+      \fi%
+      }%
+      \if@school%
+	Další informace naleznete ve chráněné sekci stránek AO: \url{http://olympiada.astro.cz/ucitel}
+      \fi%
+    \fi%
+  \fi%
+}
+% \eval{min_points}, max is automatic
+
+
+%% exercise counter
+\newcounter{exercise}[section]
+\newcommand{\E}{\textbf{\refstepcounter{exercise}\alph{exercise})}\space}
+% \E
+
+
+%% box for results
+\newcommand{\result}[2]{%
+  \begingroup%
+  \renewcommand*{\tabcolsep}{0.01\textwidth}% [v1.4]
+  \begin{center}
+    \if@answer%
+      \begin{tabular}{|p{0.978\textwidth}|}
+	\hline
+	\color{blue} #2 \\
+	\hline
+      \end{tabular}
+    \else%
+      \ifthenelse{\equal{#1}{\string 0}}{}{%
+      \@defaultunits\dimen0=#1em\relax\@nnil% test for units [v1.5]
+	\begin{tabular}{|p{0.978\textwidth}|}
+	  \hline
+	  \\ [\dimen0]
+	  \hline
+	\end{tabular}}
+    \fi%
+  \end{center}
+  \endgroup%
+}
+% \result{number_of_empty_rows}{result}
+
+
+%% typeset result in bold
+\newcommand{\bfres}[1]{\bfseries\boldmath\textcolor{blue}{#1}\unboldmath}
+% \bfres{result}
+
+
+%% points for exercises
+\newcommand\points{\@ifstar\pointsmath\pointstext}
+\newcommand{\pointsmath}[1]{% [v1.5]
+  \if@public%
+  \else%
+    \if@answer%
+      \text{\textcolor{red}{\bfseries[\boldmath#1\unboldmath]}}%
+    \fi%
+  \fi
+}
+
+\newcommand{\pointstext}[1]{% [v1.5]
+  \if@public%
+  \else%
+    \if@answer%
+      \textcolor{red}{\bfseries[\boldmath#1\unboldmath]}%
+    \fi%
+  \fi
+}
+% \points{number_of_points and comments}
+
+
+%% identification of the student
+\newcounter{ii}
+\renewcommand{\theii}{\Alph{ii}}%
+\newcommand{\identify}{%
+  %% redefinition of tabular environment [v1.4]
+  \begingroup%
+  \renewcommand*{\tabcolsep}{0.01\textwidth}%
+  \renewcommand*{\arraystretch}{2.5}%
+  \if@answer%
+  \else%
+    \section*{Identifikace}
+    \vspace{-10pt}
+    {\bfseries Na každý list se zadáním nebo řešením
+    \if@ef napiš \fi\if@gh napiš \fi\if@ab napište \fi\if@cd napište \fi
+    dolů svoje jméno\if@school\else\ a identifikátor\fi. Neoznačené listy nebudou opraveny!}
+    
+    \vspace{5pt}{\bfseries \if@ef Žák\fi\if@gh Žák\fi\if@ab Student\fi\if@cd Student\fi}
+    
+    \if@school%
+      \begin{tabular}{|p{0.33\textwidth}p{0.33\textwidth}p{0.15\textwidth}p{0.108\textwidth}|}% +0.08 from \tabcolsep
+	\hline
+	{\small jméno:} & {\small příjmení:} & {\small rok nar.:} & {\small třída:} \\
+	\hline
+      \end{tabular}
+    \else%
+      \begin{tabular}{|p{0.33\textwidth}p{0.33\textwidth}p{0.278\textwidth}|}% +0.06 from \tabcolsep
+	\hline
+	{\small jméno:} & {\small příjmení:} & {\small identifikátor:} \underline{\hspace{1em}} \underline{\hspace{1em}} \underline{\hspace{1em}} \underline{\hspace{1em}} \underline{\hspace{1em}}\\
+	\hline
+      \end{tabular}
+      
+      \vspace{5pt}{\bfseries Škola}
+    
+      \begin{tabular}{|p{0.38\textwidth}p{0.38\textwidth}p{0.178\textwidth}|}% +0.06 from \tabcolsep
+	\hline
+	{\small název:} & {\small město:} & {\small PSČ:} \\
+	\hline
+      \end{tabular}
+    \fi%
+    
+    \vspace{5pt}{\bfseries Hodnocení}
+      
+    \begin{tabular}{|p{0.7\textwidth}p{0.258\textwidth}|}% +0.04 from \tabcolsep
+      \hline
+      \forloop[1]{ii}{1}{\numexpr\value{ii}-1<\totvalue{section}} {%
+	{\large\bfseries\Alph{ii}}%
+	{\large\bfseries\underline{\hspace{1.5em}}} \hspace{1em}%
+      } & \large$\mathbf{\Sigma}$ {\small (\total{nop} b.)}
+      \underline{\hspace{1.5em}} \\
+      \if@school%
+	{\small datum:} & \hspace{-10em}{\small podpis učitele:} \\
+      \fi%
+      \hline
+    \end{tabular}
+    
+    {\footnotesize{Účast v AO se řídí organizačním řádem, č.j. MŠMT -- 14 896/2012-51. Organizační řád a propozice aktuálního ročníku naleznete na \url{http://olympiada.astro.cz}}}
+  \fi%
+  \endgroup%
+}
+% \identify
+
+
+%% multiple choice question
+%% bold math in question and answer [v1.3]
+\newcounter{question}[section]
+\newcounter{option}[question]
+\newcommand\abcd{\@ifstar\abcdstar\abcdnostar}
+%% with number
+\newcommand{\abcdnostar}[6]{%
+  \vtop{%
+    \parindent=-1.5em
+    \leftskip=1.5em
+    \textbf{\makebox[1.4em][l]{\refstepcounter{question}\arabic{question}.}}{\bfseries\boldmath#2\unboldmath}
+    
+    \parindent=-1.6em
+    \leftskip=1.6em
+    \textbf{\makebox[1.4em][l]{[\makebox[1.1ex][c]{\refstepcounter{option}\alph{option}}]}}%
+    \ifthenelse{#1=1}{\if@answer{\bfres{#3}}\else{#3}\fi}{#3}
+      
+    \textbf{\makebox[1.4em][l]{[\makebox[1.1ex][c]{\refstepcounter{option}\alph{option}}]}}%
+    \ifthenelse{#1=2}{\if@answer{\bfres{#4}}\else{#4}\fi}{#4}
+      
+    \textbf{\makebox[1.4em][l]{[\makebox[1.1ex][c]{\refstepcounter{option}\alph{option}}]}}%
+    \ifthenelse{#1=3}{\if@answer{\bfres{#5}}\else{#5}\fi}{#5}
+      
+    \textbf{\makebox[1.4em][l]{[\makebox[1.1ex][c]{\refstepcounter{option}\alph{option}}]}}%
+    \ifthenelse{#1=4}{\if@answer{\bfres{#6}}\else{#6}\fi}{#6}
+  }
+  \vspace{1em}
+}
+%% without number [v1.2]
+\newcommand{\abcdstar}[6]{%
+  \vtop{%
+    \parindent=-1.5em
+%     \leftskip=1.5em
+%     \textbf{\makebox[1.4em][l]{}}{\bfseries#2}
+    \boldmath#2\unboldmath
+    \setcounter{option}{0}
+
+    \parindent=-1.6em
+    \leftskip=1.6em
+    \textbf{\makebox[1.4em][l]{[\makebox[1.1ex][c]{\refstepcounter{option}\alph{option}}]}}%
+    \ifthenelse{#1=1}{\if@answer{\bfres{#3}}\else{#3}\fi}{#3}
+      
+    \textbf{\makebox[1.4em][l]{[\makebox[1.1ex][c]{\refstepcounter{option}\alph{option}}]}}%
+    \ifthenelse{#1=2}{\if@answer{\bfres{#4}}\else{#4}\fi}{#4}
+      
+    \textbf{\makebox[1.4em][l]{[\makebox[1.1ex][c]{\refstepcounter{option}\alph{option}}]}}%
+    \ifthenelse{#1=3}{\if@answer{\bfres{#5}}\else{#5}\fi}{#5}
+      
+    \textbf{\makebox[1.4em][l]{[\makebox[1.1ex][c]{\refstepcounter{option}\alph{option}}]}}%
+    \ifthenelse{#1=4}{\if@answer{\bfres{#6}}\else{#6}\fi}{#6}
+  }
+  \vspace{1em}
+}
+% \abcd{answer_number}{exercise}{1}{2}{3}{4}
+% \abcd*{answer_number}{exercise}{1}{2}{3}{4}
+
+%% true/false
+\newcommand{\TF}[2]{%
+  \textbf{\refstepcounter{question}\arabic{question}.\space}#1\space\underline{\makebox[0.05\textwidth][l]{\if@answer\bfres{#2}\fi}}\\
+}
+% \TF{question}{T_F__or__P_N}
+
+
+%% question with answer
+\newcommand\Q{\@ifstar\Qstar\Qnostar}
+\newcommand{\Qnostar}[2]{\vtop{%
+  \textbf{\refstepcounter{question}\arabic{question}.\space}#1
+  \newline
+  \if@answer\bfres{#2}
+  \else
+    \newline
+    \underline{\makebox[\linewidth][l]{}}
+  \fi
+  \newline
+}}
+%% only question counter [v1.3]
+\newcommand{\Qstar}{\refstepcounter{question}}
+% \Q{question}{answer}
+
+%% subquestion with answer
+\newlength{\underlinewidth}
+\newcounter{quest_a}[question]
+\newcommand\Qa{\@ifstar\Qastar\Qanostar}
+\newcommand{\Qanostar}[2]{\vtop{%
+  \leftskip=1.5em
+  \parindent=-1.5em
+  \setlength{\underlinewidth}{\linewidth}
+  \addtolength{\underlinewidth}{-\leftskip}
+  \textbf{\arabic{question}.\space\refstepcounter{quest_a}\alph{quest_a})\space}#1
+  \newline
+  \if@answer\bfres{#2}
+  \else
+    \newline
+    \underline{\makebox[\underlinewidth][l]{}}
+  \fi
+  \newline
+}}
+\newcommand{\Qastar}[2]{\vtop{%
+  \setcounter{option}{0}
+  \leftskip=1.5em
+  \parindent=-1.5em
+  \textbf{\arabic{question}.\space\refstepcounter{quest_a}\alph{quest_a})\space}#1
+  \if@answer\bfres{#2}\fi
+  \newline
+}}
+% \Q{question}{answer}
+
+
+%% hint formating [v1.2]
+\newcommand{\hint}[1]{\emph{#1}}
+% \hint{some_hint}
+
+
+%% image
+\newcommand{\I}[2]{%
+  \if@answer%
+    #2%
+  \else%
+    #1%
+  \fi%
+}
+% \I{image_question}{image_answer}
+
+%% footnote without symbol
+\newcommand{\plainfootnote}[1]{%
+  \begingroup
+    \renewcommand\thefootnote{}\footnote{#1}%
+    \addtocounter{footnote}{-1}%
+  \endgroup
+}
+%
+
+
+\newcommand{\adeg}{\mathrm{^\circ}}% degree
+\newcommand{\amin}{\mathrm{^\prime}}% minute
+\newcommand{\asec}{\mathrm{^{\prime\prime}}}% second
+
+
+\endinput
+%%
+%% End of file `astroolymp.sty'.
