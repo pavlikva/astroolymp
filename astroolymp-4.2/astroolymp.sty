@@ -8,6 +8,7 @@
 %%
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
 \ProvidesPackage{astroolymp}[2024/01/10 v4.2 LaTeX package for AO]
+% [2026/04/26 v4.2.1 LaTeX package for AO] % oprava handoutů
 % [2025/06/24 v4.2 LaTeX package for AO] % oprava tučné matematiky v záhlaví, barev odkazů v řešení, přidání handoutů pro kat. AB, přidání příkazů \probauthor a \question
 % [2024/01/10 v4.1 LaTeX package for AO] % odstranění identifikátoru studenta
 % [2023/10/03 v4.0 LaTeX package for AO] % přidání emailu do identifikace (není zpětně kompatibilní)
@@ -409,7 +410,7 @@
 \newcommand{\pointsmath}[1]{% [v1.5]
   \if@public%
   \else%
-    \if@handout% [v4.2]
+    \if@handouts% [v4.2.1]
     \else%
       \if@answer%
         \text{\textcolor{red}{\bfseries[\boldmath#1\unboldmath]}}%
@@ -421,7 +422,7 @@
 \newcommand{\pointstext}[1]{% [v1.5]
   \if@public%
   \else%
-    \if@handout% [v4.2]
+    \if@handouts% [v4.2.1]
     \else%
       \if@answer%
         \textcolor{red}{\bfseries[\boldmath#1\unboldmath]}%
